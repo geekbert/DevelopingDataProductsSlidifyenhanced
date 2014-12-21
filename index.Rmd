@@ -1,0 +1,109 @@
+---
+title       : frank's slidify app motivation
+subtitle    : a shiny app to analyse stock trends
+author      : geekbert 
+job         : 
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## Agenda
+
+1. Introduction
+2. Results
+3. Use cases
+4. Outlook
+
+--- 
+
+## 1. Introduction
+
+- This slidify deck was created to motivate a shiny app.
+- The shiny app in question is available here:
+  https://geekbert.shinyapps.io/franksenhancedcourseproject/ 
+- it represents an interactive chart to analyse stock prices in software industry, 
+  for select stocks (Software AG, SAP, ....)  
+
+---
+
+## 2. Results
+```{r, echo=FALSE, message = FALSE, warnings = FALSE}
+library(ggplot2)
+library(directlabels)
+library(shiny)
+library(shinyapps)
+library(RCurl)
+
+SAP <- getURL("http://real-chart.finance.yahoo.com/table.csv?s=SAP.DE&a=00&b=1&c=2014&d=11&e=31&f=2016&g=d&ignore=.csv", ssl.verifypeer = FALSE)
+SOW <- getURL("http://real-chart.finance.yahoo.com/table.csv?s=SOW.DE&a=00&b=1&c=2014&d=11&e=31&f=2016&g=d&ignore=.csv")
+ORA <- getURL("http://real-chart.finance.yahoo.com/table.csv?s=ORCL&a=00&b=1&c=2014&d=11&e=31&f=2016&g=d&ignore=.csv")
+IBM <- getURL("http://real-chart.finance.yahoo.com/table.csv?s=IBM&a=00&b=1&c=2014&d=11&e=31&f=2016&g=d&ignore=.csv")
+MSFT <- getURL("http://real-chart.finance.yahoo.com/table.csv?s=MSFT&a=00&b=1&c=2014&d=11&e=31&f=2016&g=d&ignore=.csv")
+HP <- getURL("http://real-chart.finance.yahoo.com/table.csv?s=HPQ&a=00&b=1&c=2014&d=11&e=31&f=2016&g=d&ignore=.csv")
+
+SOW <- read.csv(text = SOW); SAP <- read.csv(text = SAP); 
+ORA <- read.csv(text = ORA); IBM <- read.csv(text = IBM); 
+MSFT <- read.csv(text = MSFT); HP <- read.csv(text = HP); 
+
+SOW <- cbind(symbol = "SOW", SOW); SAP <- cbind(symbol = "SAP", SAP); 
+ORA <- cbind(symbol = "ORA", ORA); IBM <- cbind(symbol = "IBM", IBM); 
+MSFT <- cbind(symbol = "MSFT", MSFT); HP <- cbind(symbol = "HP", HP);  
+
+y = 245  
+
+division <- function(x) {
+  x/x[y] -1
+} 
+
+SOW <- SOW[1:y, ]; SOW$diff <- division(SOW$Adj.Close)
+SAP <- SAP[1:y, ]; SAP$diff <- division(SAP$Adj.Close)
+ORA <- ORA[1:y, ]; ORA$diff <- division(ORA$Adj.Close)
+IBM <- IBM[1:y, ]; IBM$diff <- division(IBM$Adj.Close)
+MSFT <- MSFT[1:y, ]; MSFT$diff <- division(MSFT$Adj.Close)
+HP <- HP[1:y, ]; HP$diff <- division(HP$Adj.Close)
+
+
+df <- rbind(SOW,SAP,ORA,IBM,MSFT,HP) 
+colnames(df) <- tolower(colnames(df))
+colnames(df) <- gsub("[.]","", colnames(df)) # important syntax 
+#y$Date <- as.Date(y$Date, format = "%m/%d/%Y")
+df$date <- as.Date(df$date)
+
+dataset <-  df
+p <- ggplot(data=dataset, aes(x=date, y=diff, colour=symbol)) + geom_line(aes(group=symbol)) 
+p <- direct.label(ggplot(data=dataset, aes(x=date, y=diff, colour=symbol)) + geom_line())
+print(p)
+```
+
+---
+
+## 3 Further use cases
+
+Further use cases: 
+- generic trend analyses: % change over time, compared to peers
+- Correlation Analysis: % change over time, including non-peers
+- Forecast Functionality 
+  
+---
+
+## 4 Outlook
+
+Outlook: 
+- this kind of application is useful for a wide variety of use cases
+- any person making decisions based on analysis would be well advised to have
+  this as part of their skills repertoire
+- End of Story (EOS)
+  
+---
+
+
+
+
+
+
+
+
